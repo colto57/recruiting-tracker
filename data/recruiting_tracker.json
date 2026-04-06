@@ -1,0 +1,20 @@
+{
+  "updatedAt": "2026-04-06T23:40:10.410Z",
+  "data": {
+    "contacts": [
+      {
+        "id": "1775512846490_4rc3o6",
+        "name": "Angel Xie",
+        "company": "BCGX",
+        "industry": "Consulting",
+        "chatDate": "2026-04-06",
+        "notes": "Talk to other individuals as well about if I can apply to both BCG and BCGX."
+      }
+    ],
+    "applications": [],
+    "casePractice": [],
+    "dsTopics": [],
+    "sqlProblems": [],
+    "leetcodeProblems": []
+  }
+}
