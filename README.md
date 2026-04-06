@@ -49,3 +49,4 @@ Use the **GitHub Sync** card in the app.
 - The token is used only for API requests from your browser to GitHub.
 - If you use shared machines, click **Clear Saved GitHub Settings** when done.
 
+
