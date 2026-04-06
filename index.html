@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Colton's Recruiting OS</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div>
+        <h1>Colton's Recruiting OS</h1>
+        <p class="subtitle">
+          Organized recruiting tracker for Consulting, Data Science Consulting, and Private Equity
+        </p>
+      </div>
+      <div class="profile-card">
+        <p><strong>Name:</strong> Colton Mikolajczyk</p>
+        <p><strong>Program:</strong> Master's in Business Analytics, MIT</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="card github-card">
+        <h2>GitHub Sync</h2>
+        <p class="muted">
+          Save/load your tracker data directly to a JSON file in a GitHub repository.
+        </p>
+        <div class="grid github-grid">
+          <label>
+            GitHub Username
+            <input id="ghOwner" type="text" placeholder="e.g. coltonm" />
+          </label>
+          <label>
+            Repository Name
+            <input id="ghRepo" type="text" placeholder="e.g. recruiting-tracker" />
+          </label>
+          <label>
+            Branch
+            <input id="ghBranch" type="text" placeholder="main" value="main" />
+          </label>
+          <label>
+            File Path in Repo
+            <input id="ghPath" type="text" placeholder="data/recruiting_tracker.json" value="data/recruiting_tracker.json" />
+          </label>
+          <label class="full-width">
+            Personal Access Token (repo scope)
+            <input id="ghToken" type="password" placeholder="ghp_..." />
+          </label>
+        </div>
+        <div class="button-row">
+          <button id="saveGithubBtn">Save Data to GitHub</button>
+          <button id="loadGithubBtn" class="secondary">Load Data from GitHub</button>
+          <button id="clearGithubBtn" class="danger secondary">Clear Saved GitHub Settings</button>
+        </div>
+        <p id="githubStatus" class="status muted">Not connected yet.</p>
+      </section>
+
+      <section class="card summary-card">
+        <h2>Dashboard</h2>
+        <div class="summary-grid">
+          <article>
+            <h3>Networking Contacts</h3>
+            <p><span id="contactsCount">0</span> logged</p>
+          </article>
+          <article>
+            <h3>Applications</h3>
+            <p><span id="applicationsCount">0</span> submitted</p>
+          </article>
+          <article>
+            <h3>Case Practice</h3>
+            <p><span id="caseCount">0</span> sessions</p>
+          </article>
+          <article>
+            <h3>Daily DS Topics</h3>
+            <p><span id="topicsCount">0</span> entries</p>
+          </article>
+          <article>
+            <h3>SQL Practice</h3>
+            <p><span id="sqlCount">0</span> problems</p>
+          </article>
+          <article>
+            <h3>LeetCode Practice</h3>
+            <p><span id="leetcodeCount">0</span> problems</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Networking Log</h2>
+        <form id="contactForm" class="grid form-grid">
+          <label>
+            Contact Name
+            <input name="name" required />
+          </label>
+          <label>
+            Company
+            <input name="company" required />
+          </label>
+          <label>
+            Industry
+            <select name="industry" required>
+              <option value="">Select</option>
+              <option>Consulting</option>
+              <option>Data Science Consulting</option>
+              <option>Private Equity</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>
+            Date Chatted
+            <input type="date" name="chatDate" required />
+          </label>
+          <label class="full-width">
+            Notes
+            <textarea name="notes" rows="3" placeholder="What did you discuss? Follow-up actions?"></textarea>
+          </label>
+          <button type="submit">Add Contact</button>
+        </form>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Industry</th>
+                <th>Date Chatted</th>
+                <th>Notes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="contactsTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Job Applications</h2>
+        <form id="applicationForm" class="grid form-grid">
+          <label>
+            Role Title
+            <input name="role" required />
+          </label>
+          <label>
+            Company
+            <input name="company" required />
+          </label>
+          <label>
+            Industry
+            <select name="industry" required>
+              <option value="">Select</option>
+              <option>Consulting</option>
+              <option>Data Science Consulting</option>
+              <option>Private Equity</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>
+            Date Applied
+            <input type="date" name="appliedDate" required />
+          </label>
+          <label>
+            Status
+            <select name="status" required>
+              <option>Applied</option>
+              <option>Interviewing</option>
+              <option>Final Round</option>
+              <option>Offer</option>
+              <option>Rejected</option>
+              <option>Withdrew</option>
+            </select>
+          </label>
+          <label class="full-width">
+            Job Link
+            <input type="url" name="link" placeholder="https://..." required />
+          </label>
+          <label class="full-width">
+            Notes
+            <textarea name="notes" rows="3" placeholder="Application details, prep notes, contacts..."></textarea>
+          </label>
+          <button type="submit">Add Application</button>
+        </form>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Company</th>
+                <th>Industry</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+                <th>Link</th>
+                <th>Notes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Case Study Practice</h2>
+        <form id="caseForm" class="grid form-grid">
+          <label>
+            Date
+            <input type="date" name="date" required />
+          </label>
+          <label>
+            Company/Prompt
+            <input name="prompt" required />
+          </label>
+          <label>
+            Type
+            <select name="type" required>
+              <option value="">Select</option>
+              <option>Market Sizing</option>
+              <option>Profitability</option>
+              <option>Growth Strategy</option>
+              <option>M&amp;A</option>
+              <option>Operations</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>
+            Score (1-10)
+            <input type="number" min="1" max="10" name="score" />
+          </label>
+          <label class="full-width">
+            Key Learnings
+            <textarea name="notes" rows="3"></textarea>
+          </label>
+          <button type="submit">Add Case Practice</button>
+        </form>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Prompt</th>
+                <th>Type</th>
+                <th>Score</th>
+                <th>Learnings</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="caseTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Daily Data Science Topics</h2>
+        <form id="topicForm" class="grid form-grid">
+          <label>
+            Date
+            <input type="date" name="date" required />
+          </label>
+          <label>
+            Topic
+            <input name="topic" placeholder="e.g. Feature Engineering" required />
+          </label>
+          <label>
+            Time Spent (minutes)
+            <input type="number" min="0" name="minutes" />
+          </label>
+          <label class="full-width">
+            Notes
+            <textarea name="notes" rows="3" placeholder="What did you cover today?"></textarea>
+          </label>
+          <button type="submit">Add Topic Entry</button>
+        </form>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Topic</th>
+                <th>Minutes</th>
+                <th>Notes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="topicsTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>SQL &amp; LeetCode Practice</h2>
+        <div class="split-grid">
+          <div>
+            <h3>SQL</h3>
+            <form id="sqlForm" class="grid form-grid compact">
+              <label>
+                Date
+                <input type="date" name="date" required />
+              </label>
+              <label>
+                Problem Name
+                <input name="problem" required />
+              </label>
+              <label>
+                Difficulty
+                <select name="difficulty">
+                  <option>Easy</option>
+                  <option>Medium</option>
+                  <option>Hard</option>
+                </select>
+              </label>
+              <label class="full-width">
+                Link
+                <input type="url" name="link" placeholder="https://..." />
+              </label>
+              <label class="full-width">
+                Notes
+                <textarea name="notes" rows="2"></textarea>
+              </label>
+              <button type="submit">Add SQL Problem</button>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Problem</th>
+                    <th>Difficulty</th>
+                    <th>Link</th>
+                    <th>Notes</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="sqlTable"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3>LeetCode</h3>
+            <form id="leetcodeForm" class="grid form-grid compact">
+              <label>
+                Date
+                <input type="date" name="date" required />
+              </label>
+              <label>
+                Problem Name
+                <input name="problem" required />
+              </label>
+              <label>
+                Difficulty
+                <select name="difficulty">
+                  <option>Easy</option>
+                  <option>Medium</option>
+                  <option>Hard</option>
+                </select>
+              </label>
+              <label class="full-width">
+                Link
+                <input type="url" name="link" placeholder="https://..." />
+              </label>
+              <label class="full-width">
+                Notes
+                <textarea name="notes" rows="2"></textarea>
+              </label>
+              <button type="submit">Add LeetCode Problem</button>
+            </form>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Problem</th>
+                    <th>Difficulty</th>
+                    <th>Link</th>
+                    <th>Notes</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="leetcodeTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card button-row">
+        <button id="exportBtn" class="secondary">Export JSON Backup</button>
+        <label class="secondary file-label">
+          Import JSON Backup
+          <input id="importInput" type="file" accept=".json,application/json" />
+        </label>
+        <button id="resetBtn" class="danger">Reset All Data</button>
+      </section>
+    </main>
+
+    <footer>
+      <p>Built for Colton's recruiting workflow.</p>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
