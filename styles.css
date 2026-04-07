@@ -252,3 +252,126 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+/* Colorful visual refresh */
+:root {
+  --bg: #f3f4ff;
+  --text: #1c1b33;
+  --muted: #5d5b86;
+  --border: #dedbff;
+  --brand: #6d4aff;
+  --brand-dark: #4f35c9;
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(109, 74, 255, 0.16), transparent 26%),
+    radial-gradient(circle at 90% 12%, rgba(0, 191, 188, 0.18), transparent 24%),
+    radial-gradient(circle at 80% 88%, rgba(255, 122, 198, 0.14), transparent 24%),
+    var(--bg);
+}
+
+.page-header {
+  background:
+    linear-gradient(120deg, rgba(109, 74, 255, 0.15), rgba(0, 191, 188, 0.15)),
+    #ffffff;
+}
+
+.card {
+  border: 1px solid rgba(109, 74, 255, 0.18);
+  box-shadow: 0 8px 24px rgba(65, 49, 148, 0.08);
+}
+
+.card h2 {
+  color: #34298a;
+}
+
+.github-card {
+  background: linear-gradient(140deg, #ffffff, #f7f5ff);
+}
+
+.summary-grid article {
+  border: 1px solid rgba(109, 74, 255, 0.22);
+  background: linear-gradient(145deg, #ffffff, #f5f3ff);
+}
+
+.summary-grid h3 {
+  color: #4f35c9;
+}
+
+.summary-grid span {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #00a19c;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid #d7d3ff;
+  background: #ffffff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #8d77ff;
+  box-shadow: 0 0 0 3px rgba(141, 119, 255, 0.2);
+}
+
+button,
+.file-label {
+  background: linear-gradient(120deg, #6d4aff, #8a63ff);
+  border: 1px solid #6d4aff;
+}
+
+button:hover,
+.file-label:hover {
+  background: linear-gradient(120deg, #5a3ddd, #7b58e8);
+}
+
+button.secondary,
+.file-label.secondary {
+  border-color: #7050ff;
+  color: #5037bf;
+  background: #fff;
+}
+
+button.secondary:hover,
+.file-label.secondary:hover {
+  background: #f5f3ff;
+}
+
+.toggle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3f348f;
+  font-weight: 600;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.toggle-row input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #6d4aff;
+}
+
+table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th {
+  background: #f5f2ff;
+  color: #5440b2;
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(109, 74, 255, 0.03);
+}
+
+.status {
+  font-weight: 600;
+}

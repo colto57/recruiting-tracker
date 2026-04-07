@@ -1,5 +1,6 @@
 const STORAGE_KEY = "colton_recruiting_os_v1";
 const GH_SETTINGS_KEY = "colton_recruiting_os_github";
+const AUTO_SYNC_DELAY_MS = 1500;
 
 const defaultData = {
   contacts: [],
@@ -11,6 +12,8 @@ const defaultData = {
 };
 
 let data = loadData();
+let autoSyncTimer = null;
+let autoSyncInFlight = false;
 
 function uid() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -27,6 +30,7 @@ function escapeHtml(str = "") {
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  queueAutoSync();
 }
 
 function loadData() {
@@ -267,6 +271,7 @@ function readGithubSettingsFromInputs() {
     branch: document.getElementById("ghBranch").value.trim() || "main",
     path: document.getElementById("ghPath").value.trim() || "data/recruiting_tracker.json",
     token: document.getElementById("ghToken").value.trim(),
+    autoSync: document.getElementById("autoSyncToggle").checked,
   };
 }
 
@@ -280,9 +285,14 @@ function loadGithubSettingsToInputs() {
     document.getElementById("ghBranch").value = saved.branch || "main";
     document.getElementById("ghPath").value = saved.path || "data/recruiting_tracker.json";
     document.getElementById("ghToken").value = saved.token || "";
+    document.getElementById("autoSyncToggle").checked = saved.autoSync !== false;
   } catch (error) {
     console.error("Could not load GitHub settings:", error);
   }
+}
+
+function hasGithubSettings(settings) {
+  return Boolean(settings.owner && settings.repo && settings.path && settings.token);
 }
 
 function saveGithubSettings(settings) {
@@ -339,15 +349,18 @@ async function loadFileMetadata(settings) {
   }
 }
 
-async function saveToGithub() {
+async function saveToGithub({ silent = false } = {}) {
   const settings = readGithubSettingsFromInputs();
-  if (!settings.owner || !settings.repo || !settings.path || !settings.token) {
-    setGithubStatus("Fill in owner, repo, file path, and token first.", true);
+  if (!hasGithubSettings(settings)) {
+    if (!silent) {
+      setGithubStatus("Fill in owner, repo, file path, and token first.", true);
+    }
     return;
   }
 
   saveGithubSettings(settings);
-  setGithubStatus("Saving to GitHub...");
+  autoSyncInFlight = true;
+  setGithubStatus(silent ? "Auto-syncing to GitHub..." : "Saving to GitHub...");
 
   try {
     const existing = await loadFileMetadata(settings);
@@ -366,10 +379,12 @@ async function saveToGithub() {
     }
 
     await githubRequest(settings, "PUT", body);
-    setGithubStatus("Saved successfully to GitHub.");
+    setGithubStatus(silent ? "Auto-sync complete." : "Saved successfully to GitHub.");
   } catch (error) {
     console.error(error);
-    setGithubStatus(`Save failed: ${error.message}`, true);
+    setGithubStatus(`${silent ? "Auto-sync failed" : "Save failed"}: ${error.message}`, true);
+  } finally {
+    autoSyncInFlight = false;
   }
 }
 
@@ -407,11 +422,35 @@ async function loadFromGithub() {
 
 function clearGithubSettings() {
   localStorage.removeItem(GH_SETTINGS_KEY);
-  ["ghOwner", "ghRepo", "ghBranch", "ghPath", "ghToken"].forEach((id) => {
+  ["ghOwner", "ghRepo", "ghBranch", "ghPath", "ghToken", "autoSyncToggle"].forEach((id) => {
     const input = document.getElementById(id);
+    if (id === "autoSyncToggle") {
+      input.checked = true;
+      return;
+    }
     input.value = id === "ghBranch" ? "main" : id === "ghPath" ? "data/recruiting_tracker.json" : "";
   });
   setGithubStatus("Cleared saved GitHub settings.");
+}
+
+function queueAutoSync() {
+  const settings = readGithubSettingsFromInputs();
+  if (!settings.autoSync || !hasGithubSettings(settings)) return;
+  if (autoSyncInFlight) return;
+  clearTimeout(autoSyncTimer);
+  autoSyncTimer = setTimeout(() => {
+    saveToGithub({ silent: true });
+  }, AUTO_SYNC_DELAY_MS);
+}
+
+function bindGithubSettingsPersistence() {
+  ["ghOwner", "ghRepo", "ghBranch", "ghPath", "ghToken", "autoSyncToggle"].forEach((id) => {
+    const input = document.getElementById(id);
+    const eventName = id === "autoSyncToggle" ? "change" : "input";
+    input.addEventListener(eventName, () => {
+      saveGithubSettings(readGithubSettingsFromInputs());
+    });
+  });
 }
 
 function bindButtons() {
@@ -444,6 +483,7 @@ function init() {
 
   bindDeleteHandler();
   bindButtons();
+  bindGithubSettingsPersistence();
   loadGithubSettingsToInputs();
   renderAll();
 }

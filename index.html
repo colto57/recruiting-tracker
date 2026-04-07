@@ -24,7 +24,7 @@
       <section class="card github-card">
         <h2>GitHub Sync</h2>
         <p class="muted">
-          Save/load your tracker data directly to a JSON file in a GitHub repository.
+          Connect once, then auto-sync your tracker data to GitHub as you work.
         </p>
         <div class="grid github-grid">
           <label>
@@ -48,8 +48,12 @@
             <input id="ghToken" type="password" placeholder="ghp_..." />
           </label>
         </div>
+        <label class="toggle-row">
+          <input id="autoSyncToggle" type="checkbox" checked />
+          Auto-sync to GitHub when data changes
+        </label>
         <div class="button-row">
-          <button id="saveGithubBtn">Save Data to GitHub</button>
+          <button id="saveGithubBtn">Manual Save Now</button>
           <button id="loadGithubBtn" class="secondary">Load Data from GitHub</button>
           <button id="clearGithubBtn" class="danger secondary">Clear Saved GitHub Settings</button>
         </div>
