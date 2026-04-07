@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-07T00:42:07.038Z",
+  "updatedAt": "2026-04-07T00:44:54.996Z",
   "data": {
     "contacts": [
       {
@@ -36,6 +36,16 @@
       }
     ],
     "targetJobs": [
+      {
+        "id": "1775522693343_ok51o5",
+        "role": "Data Scientist",
+        "company": "BCG X",
+        "industry": "Data Science Consulting",
+        "priority": "High",
+        "link": "https://careers.bcg.com/global/en/c/data-science-and-analytics-jobs",
+        "description": "",
+        "notes": "Waiting for Link"
+      },
       {
         "id": "1775522486680_2wzesr",
         "role": "Associate Consultant",
