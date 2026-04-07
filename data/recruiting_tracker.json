@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-07T00:40:42.131Z",
+  "updatedAt": "2026-04-07T00:42:04.903Z",
   "data": {
     "contacts": [
       {
@@ -36,6 +36,16 @@
       }
     ],
     "targetJobs": [
+      {
+        "id": "1775522486680_2wzesr",
+        "role": "Associate Consultant",
+        "company": "Bain & Company",
+        "industry": "Consulting",
+        "priority": "High",
+        "link": "https://www.bain.com/careers/hiring-process/associate-consultant/",
+        "description": "",
+        "notes": "Looking for new round of application to open."
+      },
       {
         "id": "1775522440479_tg84fl",
         "role": "Business Analyst",
