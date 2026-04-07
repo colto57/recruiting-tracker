@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-07T00:29:46.792Z",
+  "updatedAt": "2026-04-07T00:30:41.756Z",
   "data": {
     "contacts": [
       {
@@ -36,7 +36,16 @@
       }
     ],
     "applications": [],
-    "casePractice": [],
+    "casePractice": [
+      {
+        "id": "1775521840108_qjb7p3",
+        "date": "2026-04-06",
+        "prompt": "Test",
+        "type": "Market Sizing",
+        "score": "2",
+        "notes": "Test"
+      }
+    ],
     "dsTopics": [],
     "sqlProblems": [],
     "leetcodeProblems": []
