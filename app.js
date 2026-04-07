@@ -412,7 +412,44 @@ function saveLiveJobsCache(jobs) {
 
 function isTargetLocation(locationText = "") {
   const text = locationText.toLowerCase();
-  return text.includes("boston") || text.includes("new york") || text.includes("nyc");
+  const bostonMetroKeywords = [
+    "boston",
+    "cambridge",
+    "somerville",
+    "brookline",
+    "newton",
+    "quincy",
+    "medford",
+    "watertown",
+    "waltham",
+    "arlington",
+    "malden",
+    "chelsea",
+    "everett",
+    "revere",
+    "needham",
+    "braintree",
+  ];
+  const nycMetroKeywords = [
+    "new york",
+    "nyc",
+    "manhattan",
+    "brooklyn",
+    "queens",
+    "bronx",
+    "staten island",
+    "jersey city",
+    "hoboken",
+    "newark",
+    "long island city",
+    "yonkers",
+    "white plains",
+    "new rochelle",
+  ];
+  return (
+    bostonMetroKeywords.some((keyword) => text.includes(keyword)) ||
+    nycMetroKeywords.some((keyword) => text.includes(keyword))
+  );
 }
 
 function classifyIndustry(roleText = "", categoryText = "") {
@@ -429,6 +466,41 @@ function stripHtml(html = "") {
     .replaceAll(/<[^>]*>/g, " ")
     .replaceAll(/\s+/g, " ")
     .trim();
+}
+
+function extractRequiredYears(text = "") {
+  const normalized = text.toLowerCase();
+  const matches = [...normalized.matchAll(/(\d+)\+?\s*(?:-|to)?\s*(\d+)?\s*years?/g)];
+  if (!matches.length) return null;
+  const values = matches.flatMap((match) => [match[1], match[2]].filter(Boolean).map(Number));
+  return values.length ? Math.max(...values) : null;
+}
+
+function isFeasibleForEarlyCareer({ role = "", description = "" }) {
+  const text = `${role} ${description}`.toLowerCase();
+  const seniorityKeywords = [
+    "senior ",
+    "sr.",
+    "sr ",
+    "lead ",
+    "principal",
+    "director",
+    "vp ",
+    "vice president",
+    "head of",
+    "manager",
+    "staff ",
+    "10+ years",
+    "8+ years",
+    "7+ years",
+    "6+ years",
+    "5+ years",
+  ];
+  if (seniorityKeywords.some((keyword) => text.includes(keyword))) return false;
+
+  const requiredYears = extractRequiredYears(text);
+  if (requiredYears !== null && requiredYears > 3) return false;
+  return true;
 }
 
 function contactFromYourNetwork(companyName) {
@@ -476,6 +548,7 @@ async function fetchMuseJobs() {
       };
     })
     .filter((job) => isTargetLocation(job.location))
+    .filter((job) => isFeasibleForEarlyCareer(job))
     .filter((job) => ["Consulting", "Data Science Consulting", "Private Equity"].includes(job.industry));
 }
 
@@ -510,6 +583,7 @@ function recommendationPool() {
   }));
   return merged.filter((job) => {
     if (!isTargetLocation(job.location)) return false;
+    if (!isFeasibleForEarlyCareer(job)) return false;
     if (job.targetGradBy && job.targetGradBy > "2026-08") return false;
     if (ignored.has(job.id)) return false;
     return true;
@@ -525,9 +599,59 @@ function chooseRecommendation({ forceNew = false } = {}) {
   return source[Math.floor(Math.random() * source.length)];
 }
 
+function fallbackRecommendation() {
+  const options = [
+    {
+      id: `fallback-${Date.now()}-1`,
+      role: "Associate Consultant",
+      company: "Oliver Wyman",
+      location: "New York, NY",
+      industry: "Consulting",
+      link: "https://www.oliverwyman.com/careers.html",
+      description:
+        "Client-facing strategy and problem-solving role across growth, operations, and diligence workstreams.",
+      whyFit:
+        "Matches your consulting target and strengths in structured analytics, communication, and case-style reasoning.",
+      contactName: "Campus Recruiting",
+      contactRole: "Talent Acquisition",
+      contactPoint: "Search LinkedIn for Oliver Wyman campus recruiter and MIT alumni at the firm.",
+      source: "Fallback Match",
+      targetGradBy: "2026-08",
+    },
+    {
+      id: `fallback-${Date.now()}-2`,
+      role: "Analytics Consultant",
+      company: "West Monroe",
+      location: "Boston, MA",
+      industry: "Data Science Consulting",
+      link: "https://www.westmonroe.com/careers",
+      description:
+        "Consulting role combining analytics, business strategy, and implementation recommendations for enterprise clients.",
+      whyFit:
+        "Strong overlap with MIT business analytics training and your data science consulting recruiting focus.",
+      contactName: "University Recruiting Team",
+      contactRole: "Recruiter",
+      contactPoint: "Use West Monroe careers contacts and alumni outreach for informational chats.",
+      source: "Fallback Match",
+      targetGradBy: "2026-08",
+    },
+  ];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
 function getCurrentRecommendation() {
-  const pool = recommendationPool();
-  if (!pool.length) return null;
+  let pool = recommendationPool();
+  if (!pool.length && (data.ignoredRecommendations || []).length) {
+    data.ignoredRecommendations = [];
+    saveData();
+    pool = recommendationPool();
+  }
+  if (!pool.length) {
+    const fallback = fallbackRecommendation();
+    recommendationState.currentRecommendationId = fallback.id;
+    saveRecommendationState();
+    return fallback;
+  }
   const existing = pool.find((job) => job.id === recommendationState.currentRecommendationId);
   if (existing) return existing;
   const fresh = chooseRecommendation();
@@ -575,7 +699,10 @@ function renderRecommendationCard() {
   const link = document.getElementById("recJobLink");
   link.href = recommendation.link;
   link.textContent = "Open job post";
-  setRecommendationStatus("Match ready. Add it to your target list or generate another.");
+  const liveCount = liveJobRecommendations.length;
+  setRecommendationStatus(
+    `Match ready. Add it to your target list or generate another. (${liveCount} live listings cached)`
+  );
 }
 
 function todayKey() {
