@@ -4,6 +4,7 @@ const AUTO_SYNC_DELAY_MS = 1500;
 
 const defaultData = {
   contacts: [],
+  targetJobs: [],
   applications: [],
   casePractice: [],
   dsTopics: [],
@@ -40,6 +41,7 @@ function loadData() {
     const parsed = JSON.parse(raw);
     return {
       contacts: parsed.contacts || [],
+      targetJobs: parsed.targetJobs || [],
       applications: parsed.applications || [],
       casePractice: parsed.casePractice || [],
       dsTopics: parsed.dsTopics || [],
@@ -54,6 +56,7 @@ function loadData() {
 
 function renderCounts() {
   document.getElementById("contactsCount").textContent = data.contacts.length;
+  document.getElementById("targetJobsCount").textContent = data.targetJobs.length;
   document.getElementById("applicationsCount").textContent = data.applications.length;
   document.getElementById("caseCount").textContent = data.casePractice.length;
   document.getElementById("topicsCount").textContent = data.dsTopics.length;
@@ -83,6 +86,26 @@ function renderContacts() {
         <td>${escapeHtml(row.chatDate)}</td>
         <td>${escapeHtml(row.notes || "")}</td>
         <td>${createDeleteButton("contacts", row.id)}</td>
+      </tr>
+    `
+    )
+    .join("");
+}
+
+function renderTargetJobs() {
+  const tbody = document.getElementById("targetJobsTable");
+  tbody.innerHTML = data.targetJobs
+    .map(
+      (row) => `
+      <tr>
+        <td>${escapeHtml(row.role)}</td>
+        <td>${escapeHtml(row.company)}</td>
+        <td>${escapeHtml(row.industry)}</td>
+        <td>${escapeHtml(row.priority)}</td>
+        <td>${linkCell(row.link)}</td>
+        <td>${escapeHtml(row.description || "")}</td>
+        <td>${escapeHtml(row.notes || "")}</td>
+        <td>${createDeleteButton("targetJobs", row.id)}</td>
       </tr>
     `
     )
@@ -183,6 +206,7 @@ function renderLeetcode() {
 function renderAll() {
   renderCounts();
   renderContacts();
+  renderTargetJobs();
   renderApplications();
   renderCasePractice();
   renderTopics();
@@ -247,6 +271,7 @@ function importData(file) {
       const imported = parsed.data || parsed;
       data = {
         contacts: imported.contacts || [],
+        targetJobs: imported.targetJobs || [],
         applications: imported.applications || [],
         casePractice: imported.casePractice || [],
         dsTopics: imported.dsTopics || [],
@@ -405,6 +430,7 @@ async function loadFromGithub() {
     const imported = parsed.data || parsed;
     data = {
       contacts: imported.contacts || [],
+      targetJobs: imported.targetJobs || [],
       applications: imported.applications || [],
       casePractice: imported.casePractice || [],
       dsTopics: imported.dsTopics || [],
@@ -475,6 +501,7 @@ function bindButtons() {
 
 function init() {
   bindForm("contactForm", "contacts", (v) => v);
+  bindForm("targetJobForm", "targetJobs", (v) => v);
   bindForm("applicationForm", "applications", (v) => v);
   bindForm("caseForm", "casePractice", (v) => v);
   bindForm("topicForm", "dsTopics", (v) => v);

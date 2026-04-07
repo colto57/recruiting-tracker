@@ -72,6 +72,10 @@
             <p><span id="applicationsCount">0</span> submitted</p>
           </article>
           <article>
+            <h3>Jobs To Apply</h3>
+            <p><span id="targetJobsCount">0</span> saved</p>
+          </article>
+          <article>
             <h3>Case Practice</h3>
             <p><span id="caseCount">0</span> sessions</p>
           </article>
@@ -134,6 +138,68 @@
               </tr>
             </thead>
             <tbody id="contactsTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Jobs I Want to Apply To</h2>
+        <form id="targetJobForm" class="grid form-grid">
+          <label>
+            Role Title
+            <input name="role" required />
+          </label>
+          <label>
+            Company
+            <input name="company" required />
+          </label>
+          <label>
+            Industry
+            <select name="industry" required>
+              <option value="">Select</option>
+              <option>Consulting</option>
+              <option>Data Science Consulting</option>
+              <option>Private Equity</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>
+            Priority
+            <select name="priority" required>
+              <option>High</option>
+              <option>Medium</option>
+              <option>Low</option>
+            </select>
+          </label>
+          <label class="full-width">
+            Job Link
+            <input type="url" name="link" placeholder="https://..." required />
+          </label>
+          <label class="full-width">
+            Role Description
+            <textarea name="description" rows="3" placeholder="Paste the role summary and key responsibilities."></textarea>
+          </label>
+          <label class="full-width">
+            Notes
+            <textarea name="notes" rows="2" placeholder="Why this role, networking targets, deadlines, etc."></textarea>
+          </label>
+          <button type="submit">Save Target Job</button>
+        </form>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Company</th>
+                <th>Industry</th>
+                <th>Priority</th>
+                <th>Link</th>
+                <th>Description</th>
+                <th>Notes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="targetJobsTable"></tbody>
           </table>
         </div>
       </section>
