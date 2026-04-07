@@ -4,6 +4,7 @@ const TARGET_JOB_DRAFT_KEY = "colton_recruiting_target_job_draft";
 const QUOTA_SETTINGS_KEY = "colton_recruiting_quota_settings";
 const DAILY_QUOTA_KEY = "colton_recruiting_daily_quota";
 const RECOMMENDATION_STATE_KEY = "colton_recruiting_recommendation_state";
+const LIVE_JOBS_CACHE_KEY = "colton_recruiting_live_jobs_cache";
 const AUTO_SYNC_DELAY_MS = 1500;
 
 const defaultData = {
@@ -152,6 +153,8 @@ let data = loadData();
 let autoSyncTimer = null;
 let autoSyncInFlight = false;
 let recommendationState = loadRecommendationState();
+let liveJobRecommendations = loadLiveJobsCache();
+let liveJobsLoading = false;
 
 const defaultQuotaSettings = {
   hardLeetcode: 7,
@@ -385,10 +388,128 @@ function saveRecommendationState() {
   localStorage.setItem(RECOMMENDATION_STATE_KEY, JSON.stringify(recommendationState));
 }
 
+function loadLiveJobsCache() {
+  try {
+    const raw = localStorage.getItem(LIVE_JOBS_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed.jobs) ? parsed.jobs : [];
+  } catch (error) {
+    console.error("Could not load live jobs cache:", error);
+    return [];
+  }
+}
+
+function saveLiveJobsCache(jobs) {
+  localStorage.setItem(
+    LIVE_JOBS_CACHE_KEY,
+    JSON.stringify({
+      fetchedAt: new Date().toISOString(),
+      jobs,
+    })
+  );
+}
+
+function isTargetLocation(locationText = "") {
+  const text = locationText.toLowerCase();
+  return text.includes("boston") || text.includes("new york") || text.includes("nyc");
+}
+
+function classifyIndustry(roleText = "", categoryText = "") {
+  const text = `${roleText} ${categoryText}`.toLowerCase();
+  if (text.includes("private equity") || text.includes("investment")) return "Private Equity";
+  if (text.includes("data") || text.includes("analytics") || text.includes("machine learning")) {
+    return "Data Science Consulting";
+  }
+  return "Consulting";
+}
+
+function stripHtml(html = "") {
+  return html
+    .replaceAll(/<[^>]*>/g, " ")
+    .replaceAll(/\s+/g, " ")
+    .trim();
+}
+
+function contactFromYourNetwork(companyName) {
+  const match = data.contacts.find((contact) =>
+    String(contact.company || "").toLowerCase().includes(String(companyName || "").toLowerCase())
+  );
+  if (!match) return null;
+  return {
+    name: match.name,
+    role: "Existing Networking Contact",
+    point: `You already spoke on ${match.chatDate || "a prior date"}. Follow up via your previous channel.`,
+  };
+}
+
+async function fetchMuseJobs() {
+  const pages = [1, 2, 3];
+  const responses = await Promise.all(
+    pages.map((page) => fetch(`https://www.themuse.com/api/public/jobs?page=${page}`))
+  );
+  const payloads = await Promise.all(responses.map((res) => (res.ok ? res.json() : { results: [] })));
+  const all = payloads.flatMap((payload) => payload.results || []);
+  return all
+    .map((job) => {
+      const company = job.company?.name || "Unknown Company";
+      const locations = (job.locations || []).map((loc) => loc.name).join(", ");
+      const categories = (job.categories || []).map((cat) => cat.name).join(", ");
+      const networkContact = contactFromYourNetwork(company);
+      return {
+        id: `muse-${job.id}`,
+        role: job.name || "Role",
+        company,
+        location: locations || "Location not listed",
+        industry: classifyIndustry(job.name || "", categories),
+        link: job.refs?.landing_page || "https://www.themuse.com/jobs",
+        description: stripHtml(job.contents || "").slice(0, 280) || "See job page for full description.",
+        whyFit:
+          "Live listing aligned to your location and recruiting interests. Evaluate fit quickly and add to your target list if relevant.",
+        contactName: networkContact?.name || `${company} Recruiting Team`,
+        contactRole: networkContact?.role || "Talent Acquisition",
+        contactPoint:
+          networkContact?.point ||
+          `Search LinkedIn for "${company} recruiter" and request an informational chat. Also check ${company}'s careers page.`,
+        targetGradBy: "2026-08",
+        source: "Live Listing (The Muse)",
+      };
+    })
+    .filter((job) => isTargetLocation(job.location))
+    .filter((job) => ["Consulting", "Data Science Consulting", "Private Equity"].includes(job.industry));
+}
+
+async function refreshLiveRecommendations({ silent = false } = {}) {
+  if (liveJobsLoading) return;
+  liveJobsLoading = true;
+  if (!silent) setRecommendationStatus("Fetching live listings...");
+  try {
+    const jobs = await fetchMuseJobs();
+    liveJobRecommendations = jobs.slice(0, 80);
+    saveLiveJobsCache(liveJobRecommendations);
+    if (!silent) {
+      setRecommendationStatus(
+        liveJobRecommendations.length
+          ? `Fetched ${liveJobRecommendations.length} live listings.`
+          : "No live listings matched filters. Using curated recommendations."
+      );
+    }
+  } catch (error) {
+    console.error("Live listing fetch failed:", error);
+    if (!silent) setRecommendationStatus("Live fetch failed. Using curated recommendations.", true);
+  } finally {
+    liveJobsLoading = false;
+  }
+}
+
 function recommendationPool() {
   const ignored = new Set(data.ignoredRecommendations || []);
-  return recommendedJobCatalog.filter((job) => {
-    if (!["Boston, MA", "New York, NY"].includes(job.location)) return false;
+  const merged = [...liveJobRecommendations, ...recommendedJobCatalog].map((job) => ({
+    source: "Curated Match",
+    ...job,
+  }));
+  return merged.filter((job) => {
+    if (!isTargetLocation(job.location)) return false;
     if (job.targetGradBy && job.targetGradBy > "2026-08") return false;
     if (ignored.has(job.id)) return false;
     return true;
@@ -428,6 +549,7 @@ function renderRecommendationCard() {
     document.getElementById("recCompany").textContent = "-";
     document.getElementById("recLocation").textContent = "-";
     document.getElementById("recIndustry").textContent = "-";
+    document.getElementById("recSource").textContent = "-";
     document.getElementById("recWhy").textContent = "No available recommendations right now. Generate a fresh set.";
     document.getElementById("recDescription").textContent = "-";
     document.getElementById("recContactName").textContent = "-";
@@ -444,6 +566,7 @@ function renderRecommendationCard() {
   document.getElementById("recCompany").textContent = recommendation.company;
   document.getElementById("recLocation").textContent = recommendation.location;
   document.getElementById("recIndustry").textContent = recommendation.industry;
+  document.getElementById("recSource").textContent = recommendation.source || "Curated Match";
   document.getElementById("recWhy").textContent = recommendation.whyFit;
   document.getElementById("recDescription").textContent = recommendation.description;
   document.getElementById("recContactName").textContent = recommendation.contactName;
@@ -1068,6 +1191,14 @@ function bindRecommendationButtons() {
     renderAll();
     setRecommendationStatus(next ? "Generated a new recommendation." : "Could not generate a match yet.", !next);
   });
+
+  document.getElementById("refreshLiveJobsBtn").addEventListener("click", async () => {
+    await refreshLiveRecommendations();
+    const next = chooseRecommendation({ forceNew: true });
+    recommendationState.currentRecommendationId = next?.id || recommendationState.currentRecommendationId;
+    saveRecommendationState();
+    renderAll();
+  });
 }
 
 function init() {
@@ -1090,6 +1221,9 @@ function init() {
   loadGithubSettingsToInputs();
   populateQuotaSettingsForm();
   renderAll();
+  refreshLiveRecommendations({ silent: true }).then(() => {
+    renderAll();
+  });
 }
 
 init();
