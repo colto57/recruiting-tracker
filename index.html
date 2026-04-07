@@ -21,6 +21,84 @@
     </header>
 
     <main>
+      <section class="card quota-card">
+        <h2>Today's Quota Plan</h2>
+        <p class="muted">
+          Daily targets are generated from your weekly goals and update each day automatically.
+        </p>
+        <p id="quotaDateLabel" class="status muted"></p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Goal</th>
+                <th>Today's Target</th>
+                <th>Today's Progress</th>
+                <th>Estimated Time</th>
+              </tr>
+            </thead>
+            <tbody id="quotaTableBody"></tbody>
+          </table>
+        </div>
+        <p id="quotaTotalTime" class="status"></p>
+
+        <h3>Goal Settings (Per Week)</h3>
+        <form id="quotaSettingsForm" class="grid form-grid">
+          <label>
+            Hard LeetCode Problems / Week
+            <input type="number" min="0" name="hardLeetcode" />
+          </label>
+          <label>
+            Case Studies / Week
+            <input type="number" min="0" name="caseStudy" />
+          </label>
+          <label>
+            Networking Chats / Week
+            <input type="number" min="0" name="networkingChats" />
+          </label>
+          <label>
+            Applications / Week
+            <input type="number" min="0" name="applications" />
+          </label>
+          <label>
+            SQL Problems / Week
+            <input type="number" min="0" name="sqlProblems" />
+          </label>
+          <label>
+            Data Science Topics / Week
+            <input type="number" min="0" name="dsTopics" />
+          </label>
+          <label>
+            Minutes per Hard LeetCode
+            <input type="number" min="0" name="hardLeetcodeMinutes" />
+          </label>
+          <label>
+            Minutes per Case Study
+            <input type="number" min="0" name="caseStudyMinutes" />
+          </label>
+          <label>
+            Minutes per Networking Chat
+            <input type="number" min="0" name="networkingChatsMinutes" />
+          </label>
+          <label>
+            Minutes per Application
+            <input type="number" min="0" name="applicationsMinutes" />
+          </label>
+          <label>
+            Minutes per SQL Problem
+            <input type="number" min="0" name="sqlProblemsMinutes" />
+          </label>
+          <label>
+            Minutes per Data Science Topic
+            <input type="number" min="0" name="dsTopicsMinutes" />
+          </label>
+          <div class="button-row full-width">
+            <button type="submit">Save Goal Settings</button>
+            <button id="recalculateQuotaBtn" type="button" class="secondary">Recalculate Today's Quota</button>
+          </div>
+        </form>
+      </section>
+
       <section class="card github-card">
         <h2>GitHub Sync</h2>
         <p class="muted">

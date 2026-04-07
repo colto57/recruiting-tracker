@@ -290,6 +290,14 @@ body {
   background: linear-gradient(140deg, #ffffff, #f7f5ff);
 }
 
+.quota-card {
+  background: linear-gradient(140deg, #ffffff, #f3fff8);
+}
+
+.quota-card h2 {
+  color: #1c7d5e;
+}
+
 .summary-grid article {
   border: 1px solid rgba(109, 74, 255, 0.22);
   background: linear-gradient(145deg, #ffffff, #f5f3ff);
