@@ -298,6 +298,29 @@ body {
   color: #1c7d5e;
 }
 
+.recommendations-card {
+  background: linear-gradient(140deg, #ffffff, #eef8ff);
+}
+
+.recommendations-card h2 {
+  color: #1d4f8c;
+}
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.45rem 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.recommendation-grid p {
+  margin: 0.15rem 0;
+}
+
+.recommendation-grid strong {
+  color: #2b3775;
+}
+
 .summary-grid article {
   border: 1px solid rgba(109, 74, 255, 0.22);
   background: linear-gradient(145deg, #ffffff, #f5f3ff);

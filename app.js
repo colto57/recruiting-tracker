@@ -3,11 +3,13 @@ const GH_SETTINGS_KEY = "colton_recruiting_os_github";
 const TARGET_JOB_DRAFT_KEY = "colton_recruiting_target_job_draft";
 const QUOTA_SETTINGS_KEY = "colton_recruiting_quota_settings";
 const DAILY_QUOTA_KEY = "colton_recruiting_daily_quota";
+const RECOMMENDATION_STATE_KEY = "colton_recruiting_recommendation_state";
 const AUTO_SYNC_DELAY_MS = 1500;
 
 const defaultData = {
   contacts: [],
   targetJobs: [],
+  ignoredRecommendations: [],
   applications: [],
   casePractice: [],
   dsTopics: [],
@@ -15,9 +17,141 @@ const defaultData = {
   leetcodeProblems: [],
 };
 
+const recommendedJobCatalog = [
+  {
+    id: "bain-associate-consultant-boston",
+    role: "Associate Consultant",
+    company: "Bain & Company",
+    location: "Boston, MA",
+    industry: "Consulting",
+    link: "https://www.bain.com/careers/",
+    description:
+      "Generalist consulting role focused on strategy, due diligence, and performance improvement engagements.",
+    whyFit:
+      "Strong fit for your consulting target and analytics background, with heavy client exposure and case-style problem solving.",
+    contactName: "Campus Recruiting Team",
+    contactRole: "University Recruiting",
+    contactPoint: "careers@bain.com or Bain university recruiting events at MIT",
+    targetGradBy: "2026-08",
+  },
+  {
+    id: "bcg-associate-nyc",
+    role: "Associate",
+    company: "Boston Consulting Group",
+    location: "New York, NY",
+    industry: "Consulting",
+    link: "https://careers.bcg.com/",
+    description:
+      "Entry consulting role supporting strategic initiatives, growth cases, and transformation work across industries.",
+    whyFit:
+      "Excellent path for consulting recruiting while leveraging your structured analytics and communication strengths.",
+    contactName: "BCG Talent Acquisition",
+    contactRole: "Associate Recruiter",
+    contactPoint: "Check BCG careers recruiter contacts and MIT BCG events",
+    targetGradBy: "2026-08",
+  },
+  {
+    id: "ey-parthenon-data-analytics-boston",
+    role: "Data Analytics Consultant",
+    company: "EY-Parthenon",
+    location: "Boston, MA",
+    industry: "Data Science Consulting",
+    link: "https://www.ey.com/en_us/careers",
+    description:
+      "Consulting projects combining analytics modeling, business diagnosis, and executive recommendations.",
+    whyFit:
+      "Direct overlap with business analytics training and your interest in data science consulting outcomes.",
+    contactName: "EY Campus Recruiting",
+    contactRole: "Senior Recruiter",
+    contactPoint: "Campus recruiting contacts listed on EY careers and MIT career fairs",
+    targetGradBy: "2026-08",
+  },
+  {
+    id: "deloitte-strategy-analytics-nyc",
+    role: "Strategy & Analytics Analyst",
+    company: "Deloitte",
+    location: "New York, NY",
+    industry: "Data Science Consulting",
+    link: "https://www2.deloitte.com/us/en/careers.html",
+    description:
+      "Hybrid strategy and analytics role helping clients make data-driven decisions at scale.",
+    whyFit:
+      "Combines technical analytics with consulting client impact, aligned with your dual recruiting focus.",
+    contactName: "Deloitte University Recruiting",
+    contactRole: "Campus Talent",
+    contactPoint: "University recruiting channels and Deloitte networking events",
+    targetGradBy: "2026-08",
+  },
+  {
+    id: "blackstone-portfolio-analytics-nyc",
+    role: "Portfolio Analytics Associate",
+    company: "Blackstone",
+    location: "New York, NY",
+    industry: "Private Equity",
+    link: "https://www.blackstone.com/the-firm/careers/",
+    description:
+      "Analytics support for portfolio monitoring, operational KPI reporting, and investment insights.",
+    whyFit:
+      "Matches private equity interest while leveraging your analytical depth and business modeling capabilities.",
+    contactName: "Investment Talent Team",
+    contactRole: "Recruiting Associate",
+    contactPoint: "Recruiting contacts via Blackstone careers and alumni outreach",
+    targetGradBy: "2026-08",
+  },
+  {
+    id: "kkr-data-strategy-nyc",
+    role: "Data Strategy Analyst",
+    company: "KKR",
+    location: "New York, NY",
+    industry: "Private Equity",
+    link: "https://www.kkr.com/careers",
+    description:
+      "Analyst role supporting investment and portfolio teams with market analysis and data-backed recommendations.",
+    whyFit:
+      "Strong private equity relevance with quantitative exposure and strategic decision support.",
+    contactName: "Campus & Early Careers",
+    contactRole: "Talent Acquisition",
+    contactPoint: "KKR early careers portal and targeted LinkedIn outreach",
+    targetGradBy: "2026-08",
+  },
+  {
+    id: "accenture-strategy-consulting-boston",
+    role: "Strategy Analyst",
+    company: "Accenture",
+    location: "Boston, MA",
+    industry: "Consulting",
+    link: "https://www.accenture.com/us-en/careers",
+    description:
+      "Strategy consulting role supporting growth strategy, digital transformation, and operating model redesign.",
+    whyFit:
+      "Broad consulting training ground with opportunities to apply analytics and client-facing problem solving.",
+    contactName: "Accenture Recruiting",
+    contactRole: "Analyst Program Recruiter",
+    contactPoint: "Recruiter contacts via Accenture careers and school recruiting events",
+    targetGradBy: "2026-08",
+  },
+  {
+    id: "zs-decision-analytics-boston",
+    role: "Decision Analytics Associate",
+    company: "ZS",
+    location: "Boston, MA",
+    industry: "Data Science Consulting",
+    link: "https://www.zs.com/careers",
+    description:
+      "Consulting analytics role focused on advanced modeling, experimentation, and commercial strategy.",
+    whyFit:
+      "High overlap with data science consulting goals and advanced analytics application in business contexts.",
+    contactName: "ZS Talent Acquisition",
+    contactRole: "Campus Recruiter",
+    contactPoint: "ZS careers portal and informational chats with ZS alumni",
+    targetGradBy: "2026-08",
+  },
+];
+
 let data = loadData();
 let autoSyncTimer = null;
 let autoSyncInFlight = false;
+let recommendationState = loadRecommendationState();
 
 const defaultQuotaSettings = {
   hardLeetcode: 7,
@@ -60,6 +194,7 @@ function loadData() {
     return {
       contacts: parsed.contacts || [],
       targetJobs: parsed.targetJobs || [],
+      ignoredRecommendations: parsed.ignoredRecommendations || [],
       applications: parsed.applications || [],
       casePractice: parsed.casePractice || [],
       dsTopics: parsed.dsTopics || [],
@@ -222,6 +357,7 @@ function renderLeetcode() {
 }
 
 function renderAll() {
+  renderRecommendationCard();
   renderQuotaCard();
   renderCounts();
   renderContacts();
@@ -231,6 +367,92 @@ function renderAll() {
   renderTopics();
   renderSql();
   renderLeetcode();
+}
+
+function loadRecommendationState() {
+  try {
+    const raw = localStorage.getItem(RECOMMENDATION_STATE_KEY);
+    if (!raw) return { currentRecommendationId: null };
+    const parsed = JSON.parse(raw);
+    return { currentRecommendationId: parsed.currentRecommendationId || null };
+  } catch (error) {
+    console.error("Could not load recommendation state:", error);
+    return { currentRecommendationId: null };
+  }
+}
+
+function saveRecommendationState() {
+  localStorage.setItem(RECOMMENDATION_STATE_KEY, JSON.stringify(recommendationState));
+}
+
+function recommendationPool() {
+  const ignored = new Set(data.ignoredRecommendations || []);
+  return recommendedJobCatalog.filter((job) => {
+    if (!["Boston, MA", "New York, NY"].includes(job.location)) return false;
+    if (job.targetGradBy && job.targetGradBy > "2026-08") return false;
+    if (ignored.has(job.id)) return false;
+    return true;
+  });
+}
+
+function chooseRecommendation({ forceNew = false } = {}) {
+  const pool = recommendationPool();
+  if (!pool.length) return null;
+  const currentId = recommendationState.currentRecommendationId;
+  const options = forceNew ? pool.filter((job) => job.id !== currentId) : pool;
+  const source = options.length ? options : pool;
+  return source[Math.floor(Math.random() * source.length)];
+}
+
+function getCurrentRecommendation() {
+  const pool = recommendationPool();
+  if (!pool.length) return null;
+  const existing = pool.find((job) => job.id === recommendationState.currentRecommendationId);
+  if (existing) return existing;
+  const fresh = chooseRecommendation();
+  recommendationState.currentRecommendationId = fresh?.id || null;
+  saveRecommendationState();
+  return fresh || null;
+}
+
+function setRecommendationStatus(message, isError = false) {
+  const status = document.getElementById("recommendationStatus");
+  status.textContent = message;
+  status.style.color = isError ? "#b42318" : "";
+}
+
+function renderRecommendationCard() {
+  const recommendation = getCurrentRecommendation();
+  if (!recommendation) {
+    document.getElementById("recRole").textContent = "-";
+    document.getElementById("recCompany").textContent = "-";
+    document.getElementById("recLocation").textContent = "-";
+    document.getElementById("recIndustry").textContent = "-";
+    document.getElementById("recWhy").textContent = "No available recommendations right now. Generate a fresh set.";
+    document.getElementById("recDescription").textContent = "-";
+    document.getElementById("recContactName").textContent = "-";
+    document.getElementById("recContactRole").textContent = "-";
+    document.getElementById("recContactPoint").textContent = "-";
+    const link = document.getElementById("recJobLink");
+    link.href = "#";
+    link.textContent = "Open job post";
+    setRecommendationStatus("All current recommendations are ignored. Click Generate New Match to refresh.");
+    return;
+  }
+
+  document.getElementById("recRole").textContent = recommendation.role;
+  document.getElementById("recCompany").textContent = recommendation.company;
+  document.getElementById("recLocation").textContent = recommendation.location;
+  document.getElementById("recIndustry").textContent = recommendation.industry;
+  document.getElementById("recWhy").textContent = recommendation.whyFit;
+  document.getElementById("recDescription").textContent = recommendation.description;
+  document.getElementById("recContactName").textContent = recommendation.contactName;
+  document.getElementById("recContactRole").textContent = recommendation.contactRole;
+  document.getElementById("recContactPoint").textContent = recommendation.contactPoint;
+  const link = document.getElementById("recJobLink");
+  link.href = recommendation.link;
+  link.textContent = "Open job post";
+  setRecommendationStatus("Match ready. Add it to your target list or generate another.");
 }
 
 function todayKey() {
@@ -538,6 +760,7 @@ function importData(file) {
       data = {
         contacts: imported.contacts || [],
         targetJobs: imported.targetJobs || [],
+        ignoredRecommendations: imported.ignoredRecommendations || [],
         applications: imported.applications || [],
         casePractice: imported.casePractice || [],
         dsTopics: imported.dsTopics || [],
@@ -697,6 +920,7 @@ async function loadFromGithub() {
     data = {
       contacts: imported.contacts || [],
       targetJobs: imported.targetJobs || [],
+      ignoredRecommendations: imported.ignoredRecommendations || [],
       applications: imported.applications || [],
       casePractice: imported.casePractice || [],
       dsTopics: imported.dsTopics || [],
@@ -784,6 +1008,68 @@ function bindQuotaSettingsForm() {
   });
 }
 
+function bindRecommendationButtons() {
+  document.getElementById("addRecommendedJobBtn").addEventListener("click", () => {
+    const recommendation = getCurrentRecommendation();
+    if (!recommendation) {
+      setRecommendationStatus("No recommendation available right now.", true);
+      return;
+    }
+
+    const alreadySaved = data.targetJobs.some(
+      (job) => job.role === recommendation.role && job.company === recommendation.company
+    );
+    if (alreadySaved) {
+      setRecommendationStatus("This recommendation is already in your target jobs.");
+      return;
+    }
+
+    data.targetJobs.unshift({
+      id: uid(),
+      role: recommendation.role,
+      company: recommendation.company,
+      industry: recommendation.industry,
+      priority: "Medium",
+      link: recommendation.link,
+      description: recommendation.description,
+      notes: `Recommended fit: ${recommendation.whyFit}\nPotential contact: ${recommendation.contactName} (${recommendation.contactRole}) - ${recommendation.contactPoint}`,
+    });
+    saveData();
+    renderAll();
+    setRecommendationStatus("Added to Jobs I Want to Apply To.");
+  });
+
+  document.getElementById("ignoreRecommendedJobBtn").addEventListener("click", () => {
+    const recommendation = getCurrentRecommendation();
+    if (!recommendation) {
+      setRecommendationStatus("No recommendation available to ignore.", true);
+      return;
+    }
+    data.ignoredRecommendations = Array.from(
+      new Set([...(data.ignoredRecommendations || []), recommendation.id])
+    );
+    const next = chooseRecommendation({ forceNew: true });
+    recommendationState.currentRecommendationId = next?.id || null;
+    saveRecommendationState();
+    saveData();
+    renderAll();
+    setRecommendationStatus(next ? "Ignored. Here is a fresh match." : "Ignored. No more matches right now.");
+  });
+
+  document.getElementById("newRecommendationBtn").addEventListener("click", () => {
+    let next = chooseRecommendation({ forceNew: true });
+    if (!next) {
+      data.ignoredRecommendations = [];
+      next = chooseRecommendation({ forceNew: true });
+    }
+    recommendationState.currentRecommendationId = next?.id || null;
+    saveRecommendationState();
+    saveData();
+    renderAll();
+    setRecommendationStatus(next ? "Generated a new recommendation." : "Could not generate a match yet.", !next);
+  });
+}
+
 function init() {
   bindForm("contactForm", "contacts", (v) => v);
   bindForm("targetJobForm", "targetJobs", (v) => v, {
@@ -798,6 +1084,7 @@ function init() {
   bindDeleteHandler();
   bindButtons();
   bindQuotaSettingsForm();
+  bindRecommendationButtons();
   bindGithubSettingsPersistence();
   bindFormDraftPersistence("targetJobForm", TARGET_JOB_DRAFT_KEY);
   loadGithubSettingsToInputs();

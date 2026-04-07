@@ -21,6 +21,31 @@
     </header>
 
     <main>
+      <section class="card recommendations-card">
+        <h2>Recommended Jobs For You</h2>
+        <p class="muted">
+          Matches for Boston or New York, aligned with your Aug 2026 graduation timeline and target industries.
+        </p>
+        <div class="recommendation-grid">
+          <p><strong>Role:</strong> <span id="recRole">-</span></p>
+          <p><strong>Company:</strong> <span id="recCompany">-</span></p>
+          <p><strong>Location:</strong> <span id="recLocation">-</span></p>
+          <p><strong>Industry:</strong> <span id="recIndustry">-</span></p>
+          <p class="full-width"><strong>Why this is a fit:</strong> <span id="recWhy">-</span></p>
+          <p class="full-width"><strong>Role summary:</strong> <span id="recDescription">-</span></p>
+          <p><strong>Potential contact:</strong> <span id="recContactName">-</span></p>
+          <p><strong>Contact title:</strong> <span id="recContactRole">-</span></p>
+          <p class="full-width"><strong>Point of contact:</strong> <span id="recContactPoint">-</span></p>
+          <p class="full-width"><strong>Job link:</strong> <a id="recJobLink" href="#" target="_blank" rel="noopener noreferrer">Open job post</a></p>
+        </div>
+        <div class="button-row">
+          <button id="addRecommendedJobBtn">Add to Jobs I Want to Apply To</button>
+          <button id="ignoreRecommendedJobBtn" class="secondary">Ignore This Job</button>
+          <button id="newRecommendationBtn" class="secondary">Generate New Match</button>
+        </div>
+        <p id="recommendationStatus" class="status muted">Generating your first match...</p>
+      </section>
+
       <section class="card quota-card">
         <h2>Today's Quota Plan</h2>
         <p class="muted">
