@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-07T00:45:54.224Z",
+  "updatedAt": "2026-04-07T00:55:43.553Z",
   "data": {
     "contacts": [
       {
@@ -77,6 +77,7 @@
         "notes": "I really like the energy."
       }
     ],
+    "ignoredRecommendations": [],
     "applications": [
       {
         "id": "1775522126507_qdoxws",
