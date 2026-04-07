@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-07T00:34:15.370Z",
+  "updatedAt": "2026-04-07T00:35:28.152Z",
   "data": {
     "contacts": [
       {
@@ -36,7 +36,18 @@
       }
     ],
     "targetJobs": [],
-    "applications": [],
+    "applications": [
+      {
+        "id": "1775522126507_qdoxws",
+        "role": "Data Scientist",
+        "company": "Stack AI",
+        "industry": "Other",
+        "appliedDate": "2026-04-01",
+        "status": "Interviewing",
+        "link": "https://jobs.ashbyhq.com/stack-ai/d65c8bc9-7b75-4fa9-b551-322fa822f657",
+        "notes": "Stack AI; NYC."
+      }
+    ],
     "casePractice": [
       {
         "id": "1775521840108_qjb7p3",
