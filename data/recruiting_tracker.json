@@ -1,7 +1,15 @@
 {
-  "updatedAt": "2026-04-07T00:17:49.738Z",
+  "updatedAt": "2026-04-07T00:18:42.986Z",
   "data": {
     "contacts": [
+      {
+        "id": "1775521121350_ipmwbo",
+        "name": "Max Knuth",
+        "company": "BCG X",
+        "industry": "Data Science Consulting",
+        "chatDate": "2026-04-02",
+        "notes": "About what to prep for BCG X; what his experience is like."
+      },
       {
         "id": "1775521068083_7zi1my",
         "name": "Sid Vijay",
