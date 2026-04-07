@@ -1,5 +1,6 @@
 const STORAGE_KEY = "colton_recruiting_os_v1";
 const GH_SETTINGS_KEY = "colton_recruiting_os_github";
+const TARGET_JOB_DRAFT_KEY = "colton_recruiting_target_job_draft";
 const AUTO_SYNC_DELAY_MS = 1500;
 
 const defaultData = {
@@ -214,7 +215,7 @@ function renderAll() {
   renderLeetcode();
 }
 
-function bindForm(formId, listKey, mapFn) {
+function bindForm(formId, listKey, mapFn, options = {}) {
   const form = document.getElementById(formId);
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -224,6 +225,42 @@ function bindForm(formId, listKey, mapFn) {
     saveData();
     renderAll();
     form.reset();
+    if (typeof options.onSaved === "function") {
+      options.onSaved();
+    }
+  });
+}
+
+function bindFormDraftPersistence(formId, draftStorageKey) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+
+  // Restore any draft values from localStorage.
+  try {
+    const raw = localStorage.getItem(draftStorageKey);
+    if (raw) {
+      const draft = JSON.parse(raw);
+      Object.entries(draft).forEach(([name, value]) => {
+        const field = form.elements.namedItem(name);
+        if (!field) return;
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+          field.value = value;
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Could not restore form draft:", error);
+  }
+
+  // Save draft values as user types.
+  form.addEventListener("input", () => {
+    try {
+      const formData = new FormData(form);
+      const draft = Object.fromEntries(formData.entries());
+      localStorage.setItem(draftStorageKey, JSON.stringify(draft));
+    } catch (error) {
+      console.error("Could not save form draft:", error);
+    }
   });
 }
 
@@ -501,7 +538,9 @@ function bindButtons() {
 
 function init() {
   bindForm("contactForm", "contacts", (v) => v);
-  bindForm("targetJobForm", "targetJobs", (v) => v);
+  bindForm("targetJobForm", "targetJobs", (v) => v, {
+    onSaved: () => localStorage.removeItem(TARGET_JOB_DRAFT_KEY),
+  });
   bindForm("applicationForm", "applications", (v) => v);
   bindForm("caseForm", "casePractice", (v) => v);
   bindForm("topicForm", "dsTopics", (v) => v);
@@ -511,6 +550,7 @@ function init() {
   bindDeleteHandler();
   bindButtons();
   bindGithubSettingsPersistence();
+  bindFormDraftPersistence("targetJobForm", TARGET_JOB_DRAFT_KEY);
   loadGithubSettingsToInputs();
   renderAll();
 }
