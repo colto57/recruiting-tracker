@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-07T00:39:22.987Z",
+  "updatedAt": "2026-04-07T00:40:42.131Z",
   "data": {
     "contacts": [
       {
@@ -36,6 +36,16 @@
       }
     ],
     "targetJobs": [
+      {
+        "id": "1775522440479_tg84fl",
+        "role": "Business Analyst",
+        "company": "McKinsey",
+        "industry": "Consulting",
+        "priority": "High",
+        "link": "https://www.mckinsey.com/careers/search-jobs/jobs/businessanalyst-15136",
+        "description": "",
+        "notes": "Due Aug 11?"
+      },
       {
         "id": "1775522361274_5spwm9",
         "role": "Deployment Strategist (ECHO)",
