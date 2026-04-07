@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-07T01:12:33.531Z",
+  "updatedAt": "2026-04-07T01:25:18.860Z",
   "data": {
     "contacts": [
       {
@@ -36,6 +36,16 @@
       }
     ],
     "targetJobs": [
+      {
+        "id": "1775525117204_sgwg5u",
+        "role": "Data Strategy Analyst",
+        "company": "KKR",
+        "industry": "Private Equity",
+        "priority": "Medium",
+        "link": "https://www.kkr.com/careers",
+        "description": "Analyst role supporting investment and portfolio teams with market analysis and data-backed recommendations.",
+        "notes": "Recommended fit: Strong private equity relevance with quantitative exposure and strategic decision support.\nPotential contact: Campus & Early Careers (Talent Acquisition) - KKR early careers portal and targeted LinkedIn outreach"
+      },
       {
         "id": "1775522693343_ok51o5",
         "role": "Data Scientist",
